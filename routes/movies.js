@@ -3,11 +3,11 @@ const { celebrate, Joi } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
 const {
   createMovie, getMovies, deleteMovie,
-} = require('../controllers/movie');
+} = require('../controllers/movies');
 
-routerMovie.get('/movie', getMovies);
+routerMovie.get('/movies', getMovies);
 
-routerMovie.post('/movie', celebrate({
+routerMovie.post('/movies', celebrate({
   body: Joi.object().keys({
     country: Joi.string().required().min(2).max(80),
     director: Joi.string().required().min(2).max(80),
@@ -23,7 +23,7 @@ routerMovie.post('/movie', celebrate({
   }),
 }), createMovie);
 
-routerMovie.delete('/movie/:movieId', celebrate({
+routerMovie.delete('/movies/:movieId', celebrate({
   params: Joi.object().keys({
     movieId: Joi.objectId().required(),
   }),

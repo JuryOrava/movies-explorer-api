@@ -6,7 +6,7 @@ const { celebrate, Joi, errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
 const routerUser = require('./routes/users');
-const routerMovie = require('./routes/movie');
+const routerMovie = require('./routes/movies');
 const { login, createUser } = require('./controllers/users');
 const NotFoundError = require('./errors/not-found-err');
 
