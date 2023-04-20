@@ -7,6 +7,7 @@ const ClientError = require('../errors/client-err'); // 401
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
+    required: true,
     minlength: 2,
     maxlength: 30,
   },
@@ -26,7 +27,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// eslint-disable-next-line no-unused-vars
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {

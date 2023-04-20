@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 const jwt = require('jsonwebtoken');
 const ClientError = require('../errors/client-err');
 
@@ -5,10 +6,7 @@ const handleAuthError = (res, next) => {
   next(new ClientError('Необходима авторизация'));
 };
 
-// eslint-disable-next-line arrow-body-style
-const extractBearerToken = (header) => {
-  return header.replace('Bearer ', '');
-};
+const extractBearerToken = (header) => header.replace('Bearer ', '');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
@@ -22,7 +20,7 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-films-secret');
   } catch (err) {
     return handleAuthError(res, next);
   }

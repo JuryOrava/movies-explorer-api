@@ -1,23 +1,21 @@
 const express = require('express');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
-const routerUser = require('./routes/users');
-const routerMovie = require('./routes/movies');
+const router = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const NotFoundError = require('./errors/not-found-err');
-
-const { writeTextToFile } = require('./errors/server-err-logs/error-logs');
-
-const date = Date.now();
-const serverErrorFile = `./errors/server-err-logs/log-${date}.txt`;
+const otherErr = require('./errors/other-err');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -69,10 +67,9 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
-app.use('/', auth, routerUser);
-app.use('/', auth, routerMovie);
+app.use('/', auth, router);
 
-app.patch('*', (err, res, next) => {
+app.patch('*', auth, (err, res, next) => {
   next(new NotFoundError('Запрашиваемая страница не найдена'));
 });
 
@@ -82,15 +79,7 @@ app.use(errors());
 
 mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb');
 
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  if (err.statusCode === undefined) {
-    res.status(500).send({ message: 'На сервере произошла ошибка.' });
-    writeTextToFile(serverErrorFile, `Дата и время ошибки: ${new Date()}; Текст ошибки: ${err.message}`);
-  } else {
-    res.status(err.statusCode).send({ message: err.message });
-  }
-});
+app.use(otherErr);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
