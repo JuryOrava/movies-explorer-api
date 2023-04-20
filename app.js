@@ -6,10 +6,15 @@ const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
-const router = require('./routes/index');
+const routerUser = require('./routes/users');
+const routerMovie = require('./routes/movies');
 const { login, createUser } = require('./controllers/users');
 const NotFoundError = require('./errors/not-found-err');
-const otherErr = require('./errors/other-err');
+
+const { writeTextToFile } = require('./errors/server-err-logs/error-logs');
+
+const date = Date.now();
+const serverErrorFile = `./errors/server-err-logs/log-${date}.txt`;
 
 const { PORT = 3000 } = process.env;
 
@@ -63,13 +68,16 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
   }),
 }), createUser);
 
-app.use('/', auth, router);
+app.use(auth);
 
-app.patch('*', auth, (err, res, next) => {
+app.use('/', routerUser);
+app.use('/', routerMovie);
+
+app.patch('*', (err, res, next) => {
   next(new NotFoundError('Запрашиваемая страница не найдена'));
 });
 
@@ -79,7 +87,14 @@ app.use(errors());
 
 mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb');
 
-app.use(otherErr);
+app.use((err, req, res) => {
+  if (err.statusCode === undefined) {
+    res.status(500).send({ message: 'На сервере произошла ошибка.' });
+    writeTextToFile(serverErrorFile, `Дата и время ошибки: ${new Date()}; Текст ошибки: ${err.message}`);
+  } else {
+    res.status(err.statusCode).send({ message: err.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

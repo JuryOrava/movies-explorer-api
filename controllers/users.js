@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const BadRequesrError = require('../errors/bad-request-err'); // 400
-const ClientError = require('../errors/client-err'); // 401
 const ConflictingRequestError = require('../errors/conflicting-request-err'); // 409
 
 module.exports.createUser = (req, res, next) => {
@@ -25,7 +24,7 @@ module.exports.createUser = (req, res, next) => {
         return next(new ConflictingRequestError('Пользователь с таким Email уже существует!'));
       }
       if (err.name === 'ValidationError') {
-        return next(new ClientError(`Введен некорректный логин или пароль. ${err.name}`));
+        return next(new BadRequesrError(`Переданы некорректные логин или пароль. ${err.name}`));
       }
       next(new Error());
     });
@@ -65,7 +64,7 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-films-secret', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch(next);

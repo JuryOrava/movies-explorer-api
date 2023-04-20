@@ -1,4 +1,3 @@
-/* eslint-disable arrow-body-style */
 const jwt = require('jsonwebtoken');
 const ClientError = require('../errors/client-err');
 

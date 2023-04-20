@@ -1,27 +1,13 @@
-const router = require('express').Router();
+const routerMovie = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
-
-const {
-  editProfile, getUserInfo,
-} = require('../controllers/users');
-
 const {
   createMovie, getMovies, deleteMovie,
 } = require('../controllers/movies');
 
-router.get('/users/me', getUserInfo);
+routerMovie.get('/movies', getMovies);
 
-router.patch('/users/me', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required().email(),
-  }),
-}), editProfile);
-
-router.get('/movies', getMovies);
-
-router.post('/movies', celebrate({
+routerMovie.post('/movies', celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),
@@ -29,7 +15,7 @@ router.post('/movies', celebrate({
     year: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(?:[-a-zA-Z0-9()@:%_.~#?&=]*)/),
-    trailer: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(?:[-a-zA-Z0-9()@:%_.~#?&=]*)/),
+    trailerLink: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(?:[-a-zA-Z0-9()@:%_.~#?&=]*)/),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
     thumbnail: Joi.string().required().regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(?:[-a-zA-Z0-9()@:%_.~#?&=]*)/),
@@ -37,10 +23,10 @@ router.post('/movies', celebrate({
   }),
 }), createMovie);
 
-router.delete('/movies/:movieId', celebrate({
+routerMovie.delete('/movies/:movieId', celebrate({
   params: Joi.object().keys({
-    movieId: Joi.number().required(),
+    movieId: Joi.objectId().required(),
   }),
 }), deleteMovie);
 
-module.exports = router;
+module.exports = routerMovie;
