@@ -24,7 +24,7 @@ module.exports.createUser = (req, res, next) => {
         return next(new ConflictingRequestError('Пользователь с таким Email уже существует!'));
       }
       if (err.name === 'ValidationError') {
-        return next(new BadRequesrError(`Переданы некорректные логин или пароль. ${err.name}`));
+        return next(new BadRequesrError('Переданы некорректные данные.'));
       }
       next(new Error());
     });
@@ -51,6 +51,9 @@ module.exports.editProfile = (req, res, next) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
+      if (err.code === 11000) {
+        return next(new ConflictingRequestError('Пользователь с таким Email уже существует!'));
+      }
       if (err.name === 'ValidationError') {
         return next(new BadRequesrError('Переданы некорректные данные при обновлении профиля.'));
       }
@@ -64,7 +67,7 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-films-secret', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'bestfilms-key-fraze', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch(next);

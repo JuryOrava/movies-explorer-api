@@ -87,7 +87,7 @@ app.use(errors());
 
 mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb');
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   if (err.statusCode === undefined) {
     res.status(500).send({ message: 'На сервере произошла ошибка.' });
     writeTextToFile(serverErrorFile, `Дата и время ошибки: ${new Date()}; Текст ошибки: ${err.message}`);
